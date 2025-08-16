@@ -3,3 +3,4 @@ tensorflow-cpu
 streamlit
 pillow
 numpy
+matplotlib
