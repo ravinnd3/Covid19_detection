@@ -9,8 +9,8 @@ import PIL
 # Load model architecture
 @st.cache_resource
 def load_model():
-    model = MobileNetV2(weights=None)  # No weights loaded initially
-    model.load_weights('model_weights.weights.h5')  # Load your saved weights
+    
+    model = tf.keras.models.load_model('best_model_transfer.h5')  # Load your saved weights
     return model
 
 model = load_model()
