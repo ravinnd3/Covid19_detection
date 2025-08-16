@@ -4,6 +4,7 @@ import gdown
 import os
 import numpy as np
 from PIL import Image
+import matplotlib.pyplot as plt
 
 # 📦 Model download info
 MODEL_ID = "1_ME01LJP56yiwFzRWRE0Kl5nxNY9bRjQ"
@@ -25,7 +26,7 @@ def download_and_load_model():
         model = tf.keras.models.load_model(MODEL_PATH, compile=False)
         return model
     except Exception as e:
-        st.error(f"❌ Failed to load model. Please check the model file format.   {e}")
+        st.error(f"❌ Failed to load model. Please check the model file format.\n\n**Error:** {e}")
         st.stop()
 
 model = download_and_load_model()
@@ -51,10 +52,9 @@ if uploaded_file:
         img_array = img_array / 255.0  # Normalize
         img_array = np.expand_dims(img_array, axis=0)  # Shape: (1, 224, 224, 3)
 
-        # ✅ Ensure correct input format
-        if not isinstance(img_array, np.ndarray) or img_array.shape != (1, 224, 224, 3):
-            st.error(f"Unexpected input shape: {img_array.shape}")
-            st.stop()
+        # ✅ Debug input shape
+        st.write(f"🔍 Input shape: {img_array.shape}")
+        st.write(f"🔍 Input type: {type(img_array)}")
 
         # 🔮 Make prediction
         predictions = model.predict(img_array)
@@ -65,9 +65,13 @@ if uploaded_file:
         st.subheader("🧠 Prediction Result")
         st.success(f"**{class_names[predicted_class]}** — Confidence: {confidence:.2%}")
 
+        # 📊 Class Probabilities as Bar Chart
         st.subheader("📊 Class Probabilities")
-        for i, prob in enumerate(predictions[0]):
-            st.write(f"{class_names[i]}: {prob:.2%}")
+        fig, ax = plt.subplots()
+        ax.bar(class_names.values(), predictions[0], color=["red", "green", "blue"])
+        ax.set_ylabel("Probability")
+        ax.set_ylim([0, 1])
+        st.pyplot(fig)
 
-    except Exception:
-        st.error("⚠️ Error processing the image or making prediction. Please try a different image.")
+    except Exception as e:
+        st.error(f"⚠️ Error processing the image or making prediction.\n\n**Error:** {e}")
