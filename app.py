@@ -48,7 +48,13 @@ if uploaded_file:
         # 🧼 Preprocess image
         img = image_data.resize((224, 224))
         img_array = tf.keras.preprocessing.image.img_to_array(img)
-        img_array = tf.expand_dims(img_array, axis=0) / 255.0
+        img_array = img_array / 255.0  # Normalize
+        img_array = np.expand_dims(img_array, axis=0)  # Shape: (1, 224, 224, 3)
+
+        # ✅ Ensure correct input format
+        if not isinstance(img_array, np.ndarray) or img_array.shape != (1, 224, 224, 3):
+            st.error(f"Unexpected input shape: {img_array.shape}")
+            st.stop()
 
         # 🔮 Make prediction
         predictions = model.predict(img_array)
