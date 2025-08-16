@@ -17,11 +17,14 @@ class_names = {0: "Covid", 1: "Normal", 2: "Viral Pneumonia"}
 def download_and_load_model():
     if not os.path.exists(MODEL_PATH):
         url = f"https://drive.google.com/uc?id={MODEL_ID}"
-        gdown.download(url, MODEL_PATH, quiet=False)
+        gdown.download(url, MODEL_PATH, quiet=False, fuzzy=True)
+    if os.path.getsize(MODEL_PATH) < 100000:  # sanity check
+        st.error("❌ Downloaded file seems incomplete. Please verify the Drive link.")
+        st.stop()
     try:
         model = tf.keras.models.load_model(MODEL_PATH, compile=False)
         return model
-    except Exception as e:
+    except Exception:
         st.error("❌ Failed to load model. Please check the model file format.")
         st.stop()
 
@@ -29,15 +32,18 @@ model = download_and_load_model()
 
 # 🎯 App title and instructions
 st.title("🩺 Chest X-ray Classification")
-st.markdown("Upload a chest X-ray image and let the model predict the condition. Supported classes: **Covid**, **Normal**, **Viral Pneumonia**.")
+st.markdown("""
+Upload a chest X-ray image and let the model predict the condition.  
+Supported classes: **Covid**, **Normal**, **Viral Pneumonia**
+""")
 
 # 📁 File uploader
-uploaded_file = st.file_uploader("Choose an image file", type=["jpg", "jpeg", "png"])
+uploaded_file = st.file_uploader("📤 Choose an image file", type=["jpg", "jpeg", "png"])
 
 if uploaded_file:
     try:
         image_data = Image.open(uploaded_file).convert("RGB")
-        st.image(image_data, caption="Uploaded Image", use_column_width=True)
+        st.image(image_data, caption="🖼️ Uploaded Image", use_column_width=True)
 
         # 🧼 Preprocess image
         img = image_data.resize((224, 224))
@@ -57,5 +63,5 @@ if uploaded_file:
         for i, prob in enumerate(predictions[0]):
             st.write(f"{class_names[i]}: {prob:.2%}")
 
-    except Exception as e:
+    except Exception:
         st.error("⚠️ Error processing the image or making prediction. Please try a different image.")
