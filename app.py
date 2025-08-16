@@ -24,8 +24,8 @@ def download_and_load_model():
     try:
         model = tf.keras.models.load_model(MODEL_PATH, compile=False)
         return model
-    except Exception:
-        st.error("❌ Failed to load model. Please check the model file format.")
+    except Exception as e:
+        st.error(f"❌ Failed to load model. Please check the model file format.   {e}")
         st.stop()
 
 model = download_and_load_model()
